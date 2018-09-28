@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import sys
+import os, sys, stat
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -41,6 +41,11 @@ class KylinDisplaySwitch(QWidget):
 
     # singleton
     def check_singleton(self):
+        if(os.path.exists("/tmp/instance_kds.lock") == False):
+            new_instance_file = open("/tmp/instance_kds.lock", 'w')
+            new_instance_file.close()
+            os.chmod("/tmp/instance_kds.lock", stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO)
+
         self.instance_file = open("/tmp/instance_kds.lock", 'w')
         try:
             fcntl.lockf(self.instance_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -194,7 +199,7 @@ class KylinDisplaySwitch(QWidget):
             self.ui.num_off_widget.show()
 
         desktop = QApplication.desktop()
-        if (desktop.screenCount > 1):
+        if (desktop.screenCount() > 1):
             desktop = desktop.screenGeometry(0)
         self.move((desktop.width() - self.width()) / 2, (desktop.height() - self.height()) / 2)
         self.ui.tipWidget.show()
